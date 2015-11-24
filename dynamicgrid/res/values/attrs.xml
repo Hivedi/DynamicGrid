@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <attr name="divider_color" format="reference" />
+
+    <declare-styleable name="DynamicGridViewHv">
+        <attr name="divider_color" />
+    </declare-styleable>
+
+ </resources>
