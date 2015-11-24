@@ -78,7 +78,12 @@ public abstract class BaseDynamicGridAdapter extends AbstractDynamicGridAdapter 
 
     @Override
     public Object getItem(int position) {
-        return mItems.get(position);
+	    // try catch
+	    if (position < mItems.size()) {
+            return mItems.get(position);
+        } else {
+            return null;
+        }
     }
 
     @Override
