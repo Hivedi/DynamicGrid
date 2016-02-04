@@ -16,7 +16,7 @@ import org.askerov.dynamicgrid.R;
  * Created by Hivedi2 on 2015-11-24.
  *
  */
-public class DynamicGridViewHv extends DynamicGridView {
+public class DynamicGridViewHv extends DynamicGridView implements AbsListView.OnScrollListener {
 
 	private Paint linePaint;
 	private float lineSize = 1;
@@ -38,6 +38,7 @@ public class DynamicGridViewHv extends DynamicGridView {
 	}
 
 	private void initComponent(Context context, AttributeSet attrs) {
+        setOnScrollListener(this);
 
 		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.DynamicGridViewHv);
 		dividerColor = ta.getColor(R.styleable.DynamicGridViewHv_divider_color, dividerColor);
@@ -45,21 +46,10 @@ public class DynamicGridViewHv extends DynamicGridView {
 
 		lineSize = getResources().getDisplayMetrics().density;
 		linePaint = new Paint();
-		linePaint.setAntiAlias(true);
-		linePaint.setColor(dividerColor);
-		linePaint.setStyle(Paint.Style.STROKE);
-		linePaint.setStrokeWidth(lineSize);
-
-		setOnScrollListener(new OnScrollListener() {
-			@Override
-			public void onScrollStateChanged(AbsListView view, int scrollState) {
-			}
-
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-				invalidate();
-			}
-		});
+        linePaint.setAntiAlias(true);
+        linePaint.setColor(dividerColor);
+        linePaint.setStyle(Paint.Style.STROKE);
+        linePaint.setStrokeWidth(lineSize);
 	}
 
 	public void setDividerColor(int c) {
@@ -82,13 +72,16 @@ public class DynamicGridViewHv extends DynamicGridView {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		int colCount = Build.VERSION.SDK_INT >= 11 ? getNumColumns() : 1;
+		int colCount = 1;
+        if (Build.VERSION.SDK_INT >= 11) {
+            colCount = getNumColumns();
+        }
 		int mh = getMeasuredHeight();
 		int mw = getMeasuredWidth();
 
-		float boxWidth = ((float) getMeasuredWidth() / (float) colCount);
+		float boxWidth = ((float) mw / (float) colCount);
 		float boxHeight = boxWidth * 0.75f;
-		int yCount = (int) (getMeasuredHeight() / boxHeight);
+		int yCount = (int) (mh / boxHeight);
 
 		for(int i=1; i<colCount; i++) {
 			canvas.drawLine(boxWidth * i, 0, boxWidth * i, mh, linePaint);
@@ -113,4 +106,14 @@ public class DynamicGridViewHv extends DynamicGridView {
 	public int computeVerticalScrollOffset() {
 		return super.computeVerticalScrollOffset();
 	}
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        // noop
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        invalidate();
+    }
 }
