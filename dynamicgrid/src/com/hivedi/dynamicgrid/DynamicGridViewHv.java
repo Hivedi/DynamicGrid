@@ -21,6 +21,7 @@ public class DynamicGridViewHv extends DynamicGridView implements AbsListView.On
 	private Paint linePaint;
 	private float lineSize = 1;
 	private int dividerColor = 0xFFcccccc;
+    private boolean drawDividers = true;
 
 	public DynamicGridViewHv(Context context) {
 		super(context);
@@ -65,41 +66,45 @@ public class DynamicGridViewHv extends DynamicGridView implements AbsListView.On
 	@Override
 	public void refreshDrawableState() {
 		super.refreshDrawableState();
-		linePaint.setColor(dividerColor);
-		invalidate();
+        if (isDrawDividers()) {
+            linePaint.setColor(dividerColor);
+            invalidate();
+        }
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		int colCount = 1;
-        if (Build.VERSION.SDK_INT >= 11) {
-            colCount = getNumColumns();
+        if (isDrawDividers()) {
+            int colCount = 1;
+            if (Build.VERSION.SDK_INT >= 11) {
+                colCount = getNumColumns();
+            }
+            int mh = getMeasuredHeight();
+            int mw = getMeasuredWidth();
+
+            float boxWidth = ((float) mw / (float) colCount);
+            float boxHeight = boxWidth * 0.75f;
+            int yCount = (int) (mh / boxHeight);
+
+            for (int i = 1; i < colCount; i++) {
+                canvas.drawLine(boxWidth * i, 0, boxWidth * i, mh, linePaint);
+            }
+
+            if (getChildCount() >= yCount * colCount) {
+                for (int i = 0; i < getChildCount() / colCount; i++) {
+                    View v = getChildAt(i * colCount);
+                    float y = v.getTop() + v.getMeasuredHeight() + (lineSize / 2f);
+                    canvas.drawLine(0, y, mw, y, linePaint);
+                }
+            } else {
+                // draw static horizontal grid lines
+                for (int i = 0; i < yCount + 1; i++) {
+                    float y = (boxHeight * (i + 1));
+                    canvas.drawLine(0, y, mw, y, linePaint);
+                }
+            }
         }
-		int mh = getMeasuredHeight();
-		int mw = getMeasuredWidth();
-
-		float boxWidth = ((float) mw / (float) colCount);
-		float boxHeight = boxWidth * 0.75f;
-		int yCount = (int) (mh / boxHeight);
-
-		for(int i=1; i<colCount; i++) {
-			canvas.drawLine(boxWidth * i, 0, boxWidth * i, mh, linePaint);
-		}
-
-		if (getChildCount() >= yCount * colCount) {
-			for (int i = 0; i < getChildCount() / colCount; i++) {
-				View v = getChildAt(i * colCount);
-				float y = v.getTop() + v.getMeasuredHeight() + (lineSize / 2f);
-				canvas.drawLine(0, y, mw, y, linePaint);
-			}
-		} else {
-			// draw static horizontal grid lines
-			for (int i = 0; i < yCount + 1; i++) {
-				float y = (boxHeight * (i + 1));
-				canvas.drawLine(0, y, mw, y, linePaint);
-			}
-		}
 	}
 
 	@Override
@@ -114,6 +119,16 @@ public class DynamicGridViewHv extends DynamicGridView implements AbsListView.On
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        invalidate();
+        if (isDrawDividers()) {
+            invalidate();
+        }
+    }
+
+    public boolean isDrawDividers() {
+        return drawDividers;
+    }
+
+    public void setDrawDividers(boolean drawDividers) {
+        this.drawDividers = drawDividers;
     }
 }
